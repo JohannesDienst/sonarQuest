@@ -7,9 +7,11 @@ import java.security.cert.X509Certificate;
 
 import javax.net.ssl.SSLContext;
 
+import org.apache.http.HttpHost;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,25 +38,30 @@ public class RestTemplateService {
             LOGGER.debug("Connecting using HTTP Basic Auth");
             return restTemplateBuilder.basicAuthorization(sonarConfig.getHttpBasicAuthUsername(),
                     sonarConfig.getHttpBasicAuthPassword())
-                    .requestFactory(requestFactory()).build();
+                    .requestFactory(requestFactory(sonarConfig)).build();
         } else {
             LOGGER.debug("Connecting using the SSL Request Factory");
-            return restTemplateBuilder.requestFactory(requestFactory()).build();
+            return restTemplateBuilder.requestFactory(requestFactory(sonarConfig)).build();
         }
     }
 
-    private ClientHttpRequestFactory requestFactory() {
+    private ClientHttpRequestFactory requestFactory(final SonarConfig sonarConfig) {
         final TrustStrategy acceptingTrustStrategy = (final X509Certificate[] chain, final String authType) -> true;
 
         final SSLContext sslContext = createSslContext(acceptingTrustStrategy);
 
         final SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
-        final CloseableHttpClient httpClient = HttpClients.custom()
-                .setSSLSocketFactory(csf)
-                .build();
+        HttpClientBuilder httpClientBuilder = HttpClients.custom()
+                .setSSLSocketFactory(csf);
+        if (sonarConfig.hasProxyConfig()) {
+            httpClientBuilder.setProxy(
+                new HttpHost(sonarConfig.getProxy(), Integer.valueOf(sonarConfig.getProxyPort()), "http"));
+        }
+        final CloseableHttpClient httpClient = httpClientBuilder.build();
 
         final HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
         requestFactory.setHttpClient(httpClient);
+
         return requestFactory;
     }
 

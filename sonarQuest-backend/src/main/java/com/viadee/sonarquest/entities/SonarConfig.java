@@ -34,6 +34,12 @@ public class SonarConfig {
     @Column(name = "http_basic_auth_password")
     private String httpBasicAuthPassword;
 
+    @Column(name = "proxy")
+    private String proxy;
+
+    @Column(name = "proxy_port")
+    private String proxyPort;
+
     public Long getId() {
         return id;
     }
@@ -74,7 +80,27 @@ public class SonarConfig {
         this.httpBasicAuthPassword = httpBasicAuthPassword;
     }
 
+    public String getProxy() {
+        return proxy;
+    }
+
+    public void setProxy(String proxy) {
+        this.proxy = proxy;
+    }
+
+    public String getProxyPort() {
+        return proxyPort;
+    }
+
+    public void setProxyPort(String proxyPort) {
+        this.proxyPort = proxyPort;
+    }
+
     public boolean hasHttpBasicAuth() {
         return StringUtils.isNotBlank(httpBasicAuthUsername) && StringUtils.isNotBlank(httpBasicAuthPassword);
+    }
+
+    public boolean hasProxyConfig() {
+        return StringUtils.isNotBlank(proxy) && StringUtils.isNotBlank(proxyPort);
     }
 }

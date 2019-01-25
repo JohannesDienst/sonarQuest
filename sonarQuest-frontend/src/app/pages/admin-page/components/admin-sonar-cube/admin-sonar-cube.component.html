@@ -24,6 +24,18 @@
     </mat-input-container>
   </div>
 
+  <div flex>
+    <mat-input-container>
+      <input matInput placeholder="Proxy URL without http(s)" [(ngModel)]="proxy">
+    </mat-input-container>
+  </div>
+
+  <div flex>
+    <mat-input-container>
+      <input matInput placeholder="Proxy Port" [(ngModel)]="proxyPort">
+    </mat-input-container>
+  </div>
+
   <div>
     <button mat-button color="primary" (click)="save()">Save</button>
   </div>
